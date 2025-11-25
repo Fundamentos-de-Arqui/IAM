@@ -9,7 +9,7 @@ import javax.jms.*;
 
 public class ActiveMQService {
     
-    private static final String BROKER_URL = "tcp://localhost:61616"; // Default ActiveMQ URL
+    private static final String BROKER_URL = "tcp://172.193.242.89:61616"; // External ActiveMQ URL
     private static final String IAM_REGISTER_QUEUE = "iam_register";
     private static final String APIGATEWAY_REGISTER_QUEUE = "apigateway_register";
     

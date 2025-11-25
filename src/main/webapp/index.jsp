@@ -73,6 +73,7 @@
     
     <h2>ActiveMQ Integration:</h2>
     <ul>
+        <li>🌐 <strong>Broker URL:</strong> tcp://172.193.242.89:61616</li>
         <li>📥 <strong>Input Queue:</strong> iam_register</li>
         <li>📤 <strong>Output Queue:</strong> apigateway_register</li>
         <li>🔄 Automatic message processing for user registration</li>
