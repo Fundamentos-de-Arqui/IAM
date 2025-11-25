@@ -1,0 +1,47 @@
+package com.soulware.pe.iam.interfaces.REST.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class LoginResponse {
+    
+    @JsonProperty("success")
+    private boolean success;
+    
+    @JsonProperty("token")
+    private String token;
+    
+    @JsonProperty("message")
+    private String message;
+    
+    public LoginResponse() {}
+    
+    public LoginResponse(boolean success, String token, String message) {
+        this.success = success;
+        this.token = token;
+        this.message = message;
+    }
+    
+    public boolean isSuccess() {
+        return success;
+    }
+    
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+    
+    public String getToken() {
+        return token;
+    }
+    
+    public void setToken(String token) {
+        this.token = token;
+    }
+    
+    public String getMessage() {
+        return message;
+    }
+    
+    public void setMessage(String message) {
+        this.message = message;
+    }
+}
