@@ -1,36 +1,58 @@
-# IAM REST API Documentation
+# IAM Service - Identity and Access Management
 
-## Overview
-This is a complete Identity and Access Management (IAM) REST API built with Java, JAX-RS (Jersey), JWT authentication, and ActiveMQ messaging. The application can be deployed as a WAR file and connects to a PostgreSQL database.
+Sistema de gestión de identidad y acceso con autenticación JWT y mensajería ActiveMQ.
 
-## Features
-- ✅ User Registration with BCrypt password hashing
-- ✅ Extended User Registration with account types and document validation
-- ✅ User Login with JWT token generation and account type information
-- ✅ JWT Authentication for protected endpoints
-- ✅ ActiveMQ integration for asynchronous user registration
-- ✅ Multiple account types (PATIENT, LEGAL_RESPONSIBLE, ADMIN, THERAPIST)
-- ✅ Document-based user identification
-- ✅ CORS support for web applications
-- ✅ PostgreSQL database integration (Neon.tech)
-- ✅ RESTful API design
-- ✅ WAR deployment ready
+## 🚀 Características
 
-## Database Configuration
-The application connects to a PostgreSQL database hosted on Neon.tech:
+- ✅ Autenticación de usuarios con JWT
+- ✅ Registro de usuarios vía ActiveMQ (asíncrono)
+- ✅ Múltiples tipos de cuenta (PATIENT, LEGAL_RESPONSIBLE, ADMIN, THERAPIST)
+- ✅ Encriptación de contraseñas con BCrypt
+- ✅ Identificación basada en documento (DNI)
+- ✅ Integración con PostgreSQL
+- ✅ Despliegue en WildFly
+
+## 🛠️ Tecnologías
+
+- **Java 8+**
+- **Jakarta EE 10**
+- **JAX-RS (Jersey)** - REST API
+- **JWT (jjwt)** - Tokens de autenticación
+- **ActiveMQ** - Mensajería asíncrona
+- **PostgreSQL** - Base de datos
+- **BCrypt** - Encriptación de contraseñas
+- **WildFly 37** - Servidor de aplicaciones
+
+---
+
+## 🌐 Endpoints de Servicio en Azure
+
+### **Base URL**
 ```
-jdbc:postgresql://ep-muddy-cell-ad61yuec-pooler.c-2.us-east-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_pyqQdKnz4XR7&sslmode=require&channelBinding=require
+http://172.193.242.89:8080/IAM-1.0-SNAPSHOT
 ```
 
-## API Endpoints
+---
 
-### Public Endpoints
+### 🔓 **Endpoints Públicos (Sin autenticación)**
 
-#### Health Check
-```
+#### 1. Health Check
+
+Verifica el estado del servicio.
+
+**Request:**
+```http
 GET /api/auth/health
 ```
-**Response:**
+
+**URL Completa:**
+```
+http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/auth/health
+```
+
+**Headers:** Ninguno
+
+**Respuesta (200 OK):**
 ```json
 {
   "success": true,
@@ -38,27 +60,275 @@ GET /api/auth/health
 }
 ```
 
-#### User Registration (DISABLED via REST)
-**Note:** Registration via REST endpoints has been disabled. User registration is only available through ActiveMQ messaging.
-
-~~POST /api/auth/register~~ - **DISABLED**
-~~POST /api/auth/register-extended~~ - **DISABLED**
-
-**Use ActiveMQ queue `iam_register` for user registration instead.**
-
-#### User Login
+**cURL:**
+```bash
+curl http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/auth/health
 ```
+
+---
+
+#### 2. Login
+
+Autentica un usuario y retorna un token JWT.
+
+**Request:**
+```http
 POST /api/auth/login
 Content-Type: application/json
 ```
-**Request Body:**
+
+**URL Completa:**
+```
+http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/auth/login
+```
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Body:**
 ```json
 {
   "identityDocumentNumber": "12345678",
-  "password": "password123"
+  "password": "myPassword123"
 }
 ```
-**Response (200 OK):**
+
+**Respuesta Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "accountType": "THERAPIST",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3OCIsInVzZXJJZCI6MSwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjE3MDAwODY0MDB9.abc123xyz",
+  "message": "Login successful"
+}
+```
+
+**Respuesta Error - Credenciales Inválidas (401 Unauthorized):**
+```json
+{
+  "success": false,
+  "message": "Invalid credentials"
+}
+```
+
+**Respuesta Error - Campos Faltantes (400 Bad Request):**
+```json
+{
+  "success": false,
+  "message": "Identity document number and password are required"
+}
+```
+
+**cURL:**
+```bash
+curl -X POST http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identityDocumentNumber": "12345678",
+    "password": "myPassword123"
+  }'
+```
+
+---
+
+### 🔒 **Endpoints Protegidos (Requieren JWT)**
+
+Todos los endpoints protegidos requieren el header de autorización:
+```
+Authorization: Bearer <jwt-token>
+```
+
+---
+
+#### 3. Obtener Perfil de Usuario
+
+Retorna la información del perfil del usuario autenticado.
+
+**Request:**
+```http
+GET /api/protected/profile
+Authorization: Bearer <jwt-token>
+```
+
+**URL Completa:**
+```
+http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/protected/profile
+```
+
+**Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Respuesta Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "identityDocumentNumber": "12345678"
+}
+```
+
+**Respuesta Error - Token Inválido (401 Unauthorized):**
+```json
+{
+  "error": "Invalid or expired token"
+}
+```
+
+**Respuesta Error - Token Faltante (401 Unauthorized):**
+```json
+{
+  "error": "Missing or invalid Authorization header"
+}
+```
+
+**cURL:**
+```bash
+curl -X GET http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/protected/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+#### 4. Test Endpoint Protegido
+
+Endpoint de prueba para verificar la autenticación JWT.
+
+**Request:**
+```http
+GET /api/protected/test
+Authorization: Bearer <jwt-token>
+```
+
+**URL Completa:**
+```
+http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/protected/test
+```
+
+**Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Respuesta Exitosa (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Hello 12345678! This is a protected endpoint."
+}
+```
+
+**Respuesta Error - Token Inválido (401 Unauthorized):**
+```json
+{
+  "error": "Invalid or expired token"
+}
+```
+
+**cURL:**
+```bash
+curl -X GET http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/protected/test \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+## 📨 **Registro via ActiveMQ**
+
+⚠️ **Nota Importante:** El registro de usuarios NO está disponible via REST. Solo se realiza a través de mensajería ActiveMQ.
+
+### Configuración ActiveMQ
+
+**Broker URL:**
+```
+tcp://172.193.242.89:61616
+```
+
+### Cola de Entrada - Registro
+
+**Queue Name:** `iam_register`
+
+**Mensaje a Enviar:**
+```json
+{
+  "accountType": "THERAPIST",
+  "password": "myPassword123",
+  "documentType": "DNI",
+  "identityDocumentNumber": "87654321"
+}
+```
+
+**Valores válidos para `accountType`:**
+- `PATIENT` - Paciente
+- `LEGAL_RESPONSIBLE` - Responsable Legal
+- `ADMIN` - Administrador
+- `THERAPIST` - Terapeuta
+
+### Cola de Salida - Respuesta
+
+**Queue Name:** `apigateway_register`
+
+**Respuesta Exitosa:**
+```json
+{
+  "userId": "1",
+  "accountType": "THERAPIST",
+  "email": null
+}
+```
+
+**Respuesta con Error:**
+```json
+{
+  "userId": null,
+  "accountType": null,
+  "email": null
+}
+```
+
+---
+
+## 🔄 Flujo Completo de Uso
+
+### Paso 1: Registrar Usuario (via ActiveMQ)
+
+Enviar mensaje a la cola `iam_register`:
+
+```json
+{
+  "accountType": "THERAPIST",
+  "password": "myPassword123",
+  "documentType": "DNI",
+  "identityDocumentNumber": "87654321"
+}
+```
+
+### Paso 2: Recibir Confirmación (via ActiveMQ)
+
+Escuchar la cola `apigateway_register` para recibir:
+
+```json
+{
+  "userId": "1",
+  "accountType": "THERAPIST",
+  "email": null
+}
+```
+
+### Paso 3: Hacer Login (REST)
+
+```bash
+curl -X POST http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identityDocumentNumber": "87654321",
+    "password": "myPassword123"
+  }'
+```
+
+Respuesta:
 ```json
 {
   "id": 1,
@@ -68,178 +338,53 @@ Content-Type: application/json
 }
 ```
 
-### Protected Endpoints
-All protected endpoints require a JWT token in the Authorization header:
-```
-Authorization: Bearer <your-jwt-token>
+### Paso 4: Usar Token en Endpoints Protegidos
+
+```bash
+curl -X GET http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/protected/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-#### Get User Profile
-```
-GET /api/protected/profile
-Authorization: Bearer <token>
-```
-**Response:**
+Respuesta:
 ```json
 {
   "id": 1,
-  "username": "testuser"
+  "identityDocumentNumber": "87654321"
 }
 ```
 
-#### Test Protected Endpoint
-```
-GET /api/protected/test
-Authorization: Bearer <token>
-```
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Hello testuser! This is a protected endpoint."
-}
-```
+---
 
-## JWT Token Details
-- **Algorithm:** HS256
-- **Expiration:** 24 hours
-- **Claims:** username, userId, issued at, expiration
+## 📊 Tabla Resumen de Endpoints
 
-## Error Responses
-The API returns consistent error responses:
+| Endpoint | Método | Autenticación | Request Body | Response |
+|----------|--------|---------------|--------------|----------|
+| `/api/auth/health` | GET | ❌ No | - | Estado del servicio |
+| `/api/auth/login` | POST | ❌ No | DNI + password | Token JWT + datos usuario |
+| `/api/protected/profile` | GET | ✅ JWT | - | Perfil del usuario |
+| `/api/protected/test` | GET | ✅ JWT | - | Mensaje de prueba |
 
-**400 Bad Request:**
-```json
-{
-  "success": false,
-  "message": "Username and password are required"
-}
-```
+---
 
-**401 Unauthorized:**
-```json
-{
-  "success": false,
-  "message": "Invalid or expired token"
-}
-```
+## ⚙️ Configuración Técnica
 
-**409 Conflict:**
-```json
-{
-  "success": false,
-  "message": "User already exists"
-}
-```
+| Componente | Configuración |
+|------------|---------------|
+| **Servidor** | WildFly 37.0.1.Final |
+| **Puerto HTTP** | 8080 |
+| **Base URL** | http://172.193.242.89:8080/IAM-1.0-SNAPSHOT |
+| **ActiveMQ Broker** | tcp://172.193.242.89:61616 |
+| **Base de Datos** | PostgreSQL (Neon.tech) |
+| **Algoritmo JWT** | HS256 |
+| **Expiración Token** | 24 horas |
+| **Encriptación Password** | BCrypt |
 
-**500 Internal Server Error:**
-```json
-{
-  "success": false,
-  "message": "Registration failed: [error details]"
-}
-```
+---
 
-## Building and Deployment
+## 🗄️ Base de Datos
 
-### Prerequisites
-1. **ActiveMQ Server** - Download and install Apache ActiveMQ
-   ```bash
-   # Start ActiveMQ (default: tcp://localhost:61616)
-   ./bin/activemq start
-   ```
+### Esquema de la tabla `users`
 
-2. **PostgreSQL Database** - Already configured with Neon.tech
-
-### Build WAR file
-```bash
-mvn clean package
-```
-
-### Deploy
-1. Ensure ActiveMQ is running on `tcp://localhost:61616`
-2. Copy the generated `target/IAM-1.0-SNAPSHOT.war` to your application server
-3. Deploy to Tomcat, WildFly, or any Jakarta EE compatible server
-4. Access the application at `http://your-server:port/IAM-1.0-SNAPSHOT/`
-
-### Configuration
-- **ActiveMQ URL:** Default is `tcp://localhost:61616` (can be configured in `ActiveMQService.java`)
-- **Database URL:** Pre-configured for Neon.tech PostgreSQL
-- **JWT Secret:** Configured in `JwtUtil.java`
-
-### Testing with curl
-
-**Register a user (via ActiveMQ only):**
-```bash
-# Registration is only available via ActiveMQ queue 'iam_register'
-# Send message to queue with format:
-# {
-#   "accountType": "THERAPIST",
-#   "password": "password123",
-#   "documentType": "DNI", 
-#   "identityDocumentNumber": "12345678"
-# }
-```
-
-**Login:**
-```bash
-curl -X POST http://localhost:8080/IAM-1.0-SNAPSHOT/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"identityDocumentNumber":"12345678","password":"password123"}'
-```
-
-**Access protected endpoint:**
-```bash
-curl -X GET http://localhost:8080/IAM-1.0-SNAPSHOT/api/protected/profile \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
-```
-
-## Architecture
-
-### Layers
-1. **Domain Layer:** User entity and UserRepository interface
-2. **Application Layer:** Business logic services (LoginUserService, RegisterUserService)
-3. **Infrastructure Layer:** Database implementation (PostgresUserRepository, ConnectionFactory)
-4. **Interface Layer:** REST controllers and DTOs
-
-### Security
-- Passwords are hashed using BCrypt with salt
-- JWT tokens are signed with HS256 algorithm
-- Protected endpoints are secured with JWT authentication filter
-- CORS is configured for cross-origin requests
-
-## ActiveMQ Integration
-
-### Message Queues
-- **Input Queue:** `iam_register` - Receives registration requests from API Gateway
-- **Output Queue:** `apigateway_register` - Sends registration responses back to API Gateway
-
-### Registration Message Format (Input)
-```json
-{
-  "accountType": "THERAPIST",
-  "password": "password123",
-  "documentType": "DNI",
-  "identityDocumentNumber": "12345678"
-}
-```
-
-### Registration Response Format (Output)
-```json
-{
-  "userId": "1",
-  "accountType": "THERAPIST",
-  "email": null
-}
-```
-
-## Account Types
-- **PATIENT** - Regular patients
-- **LEGAL_RESPONSIBLE** - Legal guardians or representatives
-- **ADMIN** - System administrators
-- **THERAPIST** - Healthcare professionals
-
-## Database Schema
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -251,10 +396,120 @@ CREATE TABLE users (
 );
 ```
 
-## Simplified User Entity
-The User entity now contains only essential fields:
-- **id** - Auto-generated primary key
-- **accountType** - Type of user account (PATIENT, LEGAL_RESPONSIBLE, ADMIN, THERAPIST)
-- **passwordHash** - BCrypt hashed password
-- **documentType** - Type of identity document (DNI, Passport, etc.)
-- **identityDocumentNumber** - Unique document number (used as login identifier)
+**Nota:** La tabla se crea automáticamente al iniciar la aplicación si no existe.
+
+---
+
+## 🏗️ Arquitectura
+
+### Capas de la Aplicación
+
+```
+┌─────────────────────────────────────┐
+│     Interface Layer (REST/MQ)       │
+│  - AuthController                   │
+│  - ProtectedController              │
+│  - RegisterMessageListener          │
+└─────────────────────────────────────┘
+                 ↓
+┌─────────────────────────────────────┐
+│     Application Layer               │
+│  - LoginUserService                 │
+│  - RegisterUserService              │
+└─────────────────────────────────────┘
+                 ↓
+┌─────────────────────────────────────┐
+│     Domain Layer                    │
+│  - User (Entity)                    │
+│  - UserRepository (Interface)       │
+└─────────────────────────────────────┘
+                 ↓
+┌─────────────────────────────────────┐
+│     Infrastructure Layer            │
+│  - PostgresUserRepository           │
+│  - ConnectionFactory                │
+│  - JwtUtil                          │
+│  - ActiveMQService                  │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 🔐 Seguridad
+
+- **Contraseñas:** Encriptadas con BCrypt (salt automático)
+- **Tokens JWT:** Firmados con HS256
+- **Expiración:** Tokens válidos por 24 horas
+- **Autenticación:** Basada en número de documento (DNI)
+- **CORS:** Configurado para permitir peticiones cross-origin
+
+---
+
+## 🚀 Despliegue
+
+### Requisitos Previos
+
+- WildFly 37.0.1.Final o superior
+- Java 8 o superior
+- PostgreSQL (Neon.tech configurado)
+- ActiveMQ en ejecución
+
+### Pasos de Despliegue
+
+1. **Compilar el proyecto:**
+```bash
+mvn clean package
+```
+
+2. **Copiar el WAR:**
+```bash
+cp target/IAM-1.0-SNAPSHOT.war /path/to/wildfly/standalone/deployments/
+```
+
+3. **Verificar despliegue:**
+```bash
+curl http://172.193.242.89:8080/IAM-1.0-SNAPSHOT/api/auth/health
+```
+
+---
+
+## 📝 Notas Importantes
+
+1. ✅ **Login:** Disponible via REST
+2. ❌ **Registro:** Solo via ActiveMQ (endpoints REST comentados/deshabilitados)
+3. 🔐 **Tokens JWT:** Expiran en 24 horas
+4. 📋 **Identificación:** Se usa el número de documento (DNI) para login, no username
+5. 🔄 **ActiveMQ:** Necesario para el registro de usuarios
+6. 🗄️ **Base de Datos:** Se inicializa automáticamente al arrancar
+
+---
+
+## 🧪 Testing
+
+### Herramientas Recomendadas
+
+- **cURL** - Línea de comandos
+- **Postman** - Cliente API visual
+- **ActiveMQ Web Console** - http://172.193.242.89:8161/admin/
+
+### Colección de Pruebas
+
+Ver ejemplos de cURL en cada endpoint arriba.
+
+---
+
+## 📄 Licencia
+
+Proyecto académico - Fundamentos de Arquitectura de Software
+
+---
+
+## 👥 Autores
+
+Soulware Platform Team
+
+---
+
+## 📞 Soporte
+
+Para issues o consultas sobre la API, contactar al equipo de desarrollo.
