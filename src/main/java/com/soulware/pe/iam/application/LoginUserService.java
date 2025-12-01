@@ -27,18 +27,18 @@ public class LoginUserService {
             User user = userRepository.findByIdentityDocumentNumber(identityDocumentNumber);
             
             if (user == null) {
-                return new LoginResult(false, null, null, null, "Invalid credentials");
+                return new LoginResult(false, null, null, null, null, "Invalid credentials");
             }
             
             if (!BCrypt.checkpw(plainPassword, user.getPasswordHash())) {
-                return new LoginResult(false, null, null, null, "Invalid credentials");
+                return new LoginResult(false, null, null, null, null, "Invalid credentials");
             }
             
             String token = jwtUtil.generateToken(user.getIdentityDocumentNumber(), user.getId());
-            return new LoginResult(true, user.getId(), user.getAccountType().toString(), token, "Login successful");
+            return new LoginResult(true, user.getId(), user.getAccountType().toString(), token, user.getProfileId(), "Login successful");
             
         } catch (Exception e) {
-            return new LoginResult(false, null, null, null, "Login failed: " + e.getMessage());
+            return new LoginResult(false, null, null, null, null, "Login failed: " + e.getMessage());
         }
     }
     
@@ -47,13 +47,15 @@ public class LoginUserService {
         private final Long userId;
         private final String accountType;
         private final String token;
+        private final Long profileId;
         private final String message;
         
-        public LoginResult(boolean success, Long userId, String accountType, String token, String message) {
+        public LoginResult(boolean success, Long userId, String accountType, String token, Long profileId, String message) {
             this.success = success;
             this.userId = userId;
             this.accountType = accountType;
             this.token = token;
+            this.profileId = profileId;
             this.message = message;
         }
         
@@ -61,6 +63,7 @@ public class LoginUserService {
         public Long getUserId() { return userId; }
         public String getAccountType() { return accountType; }
         public String getToken() { return token; }
+        public Long getProfileId() { return profileId; }
         public String getMessage() { return message; }
     }
 }

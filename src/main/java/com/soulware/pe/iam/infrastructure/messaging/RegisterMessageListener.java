@@ -41,7 +41,8 @@ public class RegisterMessageListener implements MessageListener {
                     registerMessage.getPassword(),
                     accountType,
                     registerMessage.getDocumentType(),
-                    registerMessage.getIdentityDocumentNumber()
+                    registerMessage.getIdentityDocumentNumber(),
+                    registerMessage.getProfileId()
                 );
                 
                 // Send response back to API Gateway

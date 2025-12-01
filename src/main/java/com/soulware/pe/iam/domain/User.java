@@ -6,14 +6,16 @@ public class User {
     private final String passwordHash;
     private final String documentType;
     private final String identityDocumentNumber;
+    private final Long profileId;
 
     public User(Long id, AccountType accountType, String passwordHash, 
-                String documentType, String identityDocumentNumber) {
+                String documentType, String identityDocumentNumber, Long profileId) {
         this.id = id;
         this.accountType = accountType;
         this.passwordHash = passwordHash;
         this.documentType = documentType;
         this.identityDocumentNumber = identityDocumentNumber;
+        this.profileId = profileId;
     }
 
     public Long getId() { return id; }
@@ -21,6 +23,7 @@ public class User {
     public String getPasswordHash() { return passwordHash; }
     public String getDocumentType() { return documentType; }
     public String getIdentityDocumentNumber() { return identityDocumentNumber; }
+    public Long getProfileId() { return profileId; }
 
     public enum AccountType {
         PATIENT, LEGAL_RESPONSIBLE, ADMIN, THERAPIST

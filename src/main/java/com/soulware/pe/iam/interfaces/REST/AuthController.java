@@ -140,7 +140,8 @@ public class AuthController {
                         result.getUserId(), 
                         result.getAccountType(), 
                         result.getToken(), 
-                        result.getMessage()))
+                        result.getMessage(),
+                        result.getProfileId()))
                         .build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED)

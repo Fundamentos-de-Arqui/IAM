@@ -33,13 +33,13 @@ public class RegisterUserService {
         }
 
         String hash = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-        User user = new User(null, accountType, hash, documentType, identityDocumentNumber);
+        User user = new User(null, accountType, hash, documentType, identityDocumentNumber, null);
 
         userRepository.save(user);
     }
     
     public User registerFromMessage(String plainPassword, User.AccountType accountType, 
-                                   String documentType, String identityDocumentNumber) throws Exception {
+                                   String documentType, String identityDocumentNumber, Long profileId) throws Exception {
         // basic validation
         if (identityDocumentNumber == null || identityDocumentNumber.isEmpty()) {
             throw new IllegalArgumentException("Identity document number required");
@@ -60,13 +60,13 @@ public class RegisterUserService {
         }
 
         String hash = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-        User user = new User(null, accountType, hash, documentType, identityDocumentNumber);
+        User user = new User(null, accountType, hash, documentType, identityDocumentNumber, profileId);
 
         return userRepository.saveAndReturn(user);
     }
     
     public User registerWithDetails(String plainPassword, User.AccountType accountType, 
-                                   String documentType, String identityDocumentNumber) throws Exception {
+                                   String documentType, String identityDocumentNumber, Long profileId) throws Exception {
         // basic validation
         if (identityDocumentNumber == null || identityDocumentNumber.isEmpty()) {
             throw new IllegalArgumentException("Identity document number required");
@@ -87,7 +87,7 @@ public class RegisterUserService {
         }
 
         String hash = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-        User user = new User(null, accountType, hash, documentType, identityDocumentNumber);
+        User user = new User(null, accountType, hash, documentType, identityDocumentNumber, profileId);
 
         return userRepository.saveAndReturn(user);
     }

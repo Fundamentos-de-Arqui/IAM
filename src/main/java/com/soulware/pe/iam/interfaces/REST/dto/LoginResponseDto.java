@@ -16,13 +16,17 @@ public class LoginResponseDto {
     @JsonProperty("message")
     private String message;
     
+    @JsonProperty("profileId")
+    private Long profileId;
+    
     public LoginResponseDto() {}
     
-    public LoginResponseDto(Long id, String accountType, String token, String message) {
+    public LoginResponseDto(Long id, String accountType, String token, String message, Long profileId) {
         this.id = id;
         this.accountType = accountType;
         this.token = token;
         this.message = message;
+        this.profileId = profileId;
     }
     
     public Long getId() {
@@ -55,5 +59,13 @@ public class LoginResponseDto {
     
     public void setMessage(String message) {
         this.message = message;
+    }
+    
+    public Long getProfileId() {
+        return profileId;
+    }
+    
+    public void setProfileId(Long profileId) {
+        this.profileId = profileId;
     }
 }

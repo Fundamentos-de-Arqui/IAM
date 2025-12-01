@@ -15,14 +15,18 @@ public class RegisterAccountMessage {
     
     @JsonProperty("identityDocumentNumber")
     private String identityDocumentNumber;
+
+    @JsonProperty("profileId")
+    private Long profileId;
     
     public RegisterAccountMessage() {}
     
-    public RegisterAccountMessage(String accountType, String password, String documentType, String identityDocumentNumber) {
+    public RegisterAccountMessage(String accountType, String password, String documentType, String identityDocumentNumber, Long profileId) {
         this.accountType = accountType;
         this.password = password;
         this.documentType = documentType;
         this.identityDocumentNumber = identityDocumentNumber;
+        this.profileId = profileId;
     }
     
     public String getAccountType() {
@@ -51,6 +55,14 @@ public class RegisterAccountMessage {
     
     public String getIdentityDocumentNumber() {
         return identityDocumentNumber;
+    }
+
+    public Long getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(Long profileId) {
+        this.profileId = profileId;
     }
     
     public void setIdentityDocumentNumber(String identityDocumentNumber) {
